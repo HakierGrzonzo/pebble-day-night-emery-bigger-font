@@ -10,11 +10,7 @@
 static Window *window;
 static TextLayer *time_text_layer;
 static TextLayer *date_text_layer;
-#ifdef PBL_BW
 static GBitmap *world_bitmap;
-#else
-static GBitmap *three_worlds;
-#endif
 static Layer *canvas;
 static GBitmap *image;
 static int redraw_counter;
@@ -68,11 +64,11 @@ static void draw_earth() {
         ((char *)gbitmap_get_data(image))[byte] = ((char *)gbitmap_get_data(image))[byte] & ~(0x1 << (x % 8));
       }
 #else
-      int byte = y * gbitmap_get_bytes_per_row(three_worlds) + x;
+      int byte = y * gbitmap_get_bytes_per_row(world_bitmap) + x;
       if (angle < 0) { // dark pixel
-        ((char *)gbitmap_get_data(three_worlds))[byte] = ((char *)gbitmap_get_data(three_worlds))[WIDTH*HEIGHT + byte];
+        ((char *)gbitmap_get_data(world_bitmap))[byte] = ((char *)gbitmap_get_data(world_bitmap))[WIDTH*HEIGHT + byte];
       } else { // light pixel
-        ((char *)gbitmap_get_data(three_worlds))[byte] = ((char *)gbitmap_get_data(three_worlds))[WIDTH*HEIGHT*2 + byte];
+        ((char *)gbitmap_get_data(world_bitmap))[byte] = ((char *)gbitmap_get_data(world_bitmap))[WIDTH*HEIGHT*2 + byte];
       }
 #endif
     }
@@ -160,7 +156,7 @@ static void window_load(Window *window) {
 #ifdef PBL_BW
   image = gbitmap_create_blank(GSize(WIDTH, HEIGHT), GBitmapFormat1Bit);
 #else
-  image = gbitmap_create_as_sub_bitmap(three_worlds, GRect(0, 0, WIDTH, HEIGHT));
+  image = gbitmap_create_as_sub_bitmap(world_bitmap, GRect(0, 0, WIDTH, HEIGHT));
 #endif
   draw_earth();
 }
@@ -187,7 +183,7 @@ static void init(void) {
 #ifdef PBL_BW
   world_bitmap = gbitmap_create_with_resource(RESOURCE_ID_WORLD);
 #else
-  three_worlds = gbitmap_create_with_resource(RESOURCE_ID_THREE_WORLDS);
+  world_bitmap = gbitmap_create_with_resource(RESOURCE_ID_WORLD);
 #endif
 
   window = window_create();
@@ -212,11 +208,7 @@ static void deinit(void) {
   tick_timer_service_unsubscribe();
   free(s);
   window_destroy(window);
-#ifdef PBL_BW
   gbitmap_destroy(world_bitmap);
-#else
-  gbitmap_destroy(three_worlds);
-#endif
 }
 
 int main(void) {
