@@ -44,13 +44,13 @@ static void draw_earth() {
       float angle = ((float)sin_lookup(sun_y)/(float)TRIG_MAX_RATIO) * ((float)sin_lookup(y_angle)/(float)TRIG_MAX_RATIO);
       angle = angle + ((float)cos_lookup(sun_y)/(float)TRIG_MAX_RATIO) * ((float)cos_lookup(y_angle)/(float)TRIG_MAX_RATIO) * ((float)cos_lookup(sun_x - x_angle)/(float)TRIG_MAX_RATIO);
 #ifdef PBL_BW
-      int byte = y * gbitmap_get_bytes_per_row(image) + (int)(x / 8);
-      if ((angle < 0) ^ (0x1 & (((char *)gbitmap_get_data(world_bitmap))[byte] >> (x % 8)))) {
+      int byte = y * gbitmap_get_bytes_per_row(world_bitmap) + (int)(x / 8);
+      if ((angle < 0) ^ (0x1 & (((char *)gbitmap_get_data(world_bitmap))[byte] >> (7 - x % 8)))) {
         // white pixel
-        ((char *)gbitmap_get_data(image))[byte] = ((char *)gbitmap_get_data(image))[byte] | (0x1 << (x % 8));
+        ((char *)gbitmap_get_data(image))[byte] = ((char *)gbitmap_get_data(image))[byte] | (0x1 << (7 - x % 8));
       } else {
         // black pixel
-        ((char *)gbitmap_get_data(image))[byte] = ((char *)gbitmap_get_data(image))[byte] & ~(0x1 << (x % 8));
+        ((char *)gbitmap_get_data(image))[byte] = ((char *)gbitmap_get_data(image))[byte] & ~(0x1 << (7 - x % 8));
       }
 #else
       int byte = y * gbitmap_get_bytes_per_row(world_bitmap) + x;
@@ -127,7 +127,7 @@ static void window_load(Window *window) {
   layer_set_update_proc(canvas, draw_watch);
   layer_add_child(window_layer, canvas);
 #ifdef PBL_BW
-  image = gbitmap_create_blank(GSize(width, height), GBitmapFormat1Bit);
+  image = gbitmap_create_with_resource(RESOURCE_ID_WORLD);
 #else
   image = gbitmap_create_as_sub_bitmap(world_bitmap, GRect(0, 0, width, height));
 #endif
